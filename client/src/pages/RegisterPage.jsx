@@ -18,7 +18,6 @@ const RegisterPage = () => {
       });
       alert("Registration successful. Now you can log in.");
     } catch (error) {
-      console.log(error);
       alert("Registration failed. Please try again later: " + error.message);
     }
   }

@@ -15,7 +15,6 @@ const LoginPage = () => {
     try {
       const { data } = await axios.post("/login", { email, password });
       setUser(data);
-      console.log(data);
       alert("Login successful.");
       setRedirect(true);
     } catch (error) {
