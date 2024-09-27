@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken"); // JWT (JSON Web Token) is used for authentication (generating and verifying tokens).
 const UserModel = require("./models/User");
 const cookieParser = require("cookie-parser"); // Parses cookies attached to the client request object.
+const imageDownloader = require("image-downloader");
 require("dotenv").config();
 
 // Creating an instance of an Express application
@@ -19,6 +20,7 @@ const jwtSecret = "jh56w5fd6bsrt6jqksrylx2yl4t8+7r5j+qqq"; // Secret key used to
 
 app.use(express.json()); // Parses incoming JSON requests and puts the parsed data in `req.body`.
 app.use(cookieParser()); // Parses cookies so that `req.cookies` is populated with any cookies sent by the client.
+app.use("/uploads", express.static(__dirname + "/uploads"));
 
 // CORS configuration middleware to allow requests from a specific origin
 app.use(
@@ -110,6 +112,18 @@ app.get("/profile", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.cookie("token", "").json(true);
+});
+console.log(__dirname);
+app.post("/upload-by-link", async (req, res) => {
+  const { link } = req.body;
+
+  const newName = "photo" + Date.now() + ".jpg";
+
+  await imageDownloader.image({
+    url: link,
+    dest: __dirname + "/uploads/" + newName, //C:\Users\khalid\projects\booking-app-mern\api
+  });
+  res.json(newName);
 });
 
 // Start the Express server and listen on port 4000
