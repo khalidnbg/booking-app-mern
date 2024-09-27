@@ -45,6 +45,27 @@ const PlacesPage = () => {
     setPhotoLink("");
   }
 
+  function uploadPhoto(ev) {
+    const files = ev.target.files;
+    const data = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      data.append("photos", files[i]);
+    }
+    axios
+      .post("/upload", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((response) => {
+        const { data: filenames } = response;
+
+        setAddedPhotos((prev) => {
+          return [...prev, ...filenames];
+        });
+      });
+  }
+
   return (
     <div>
       {action !== "new" && (
@@ -112,7 +133,7 @@ const PlacesPage = () => {
             <div className="mt-2 grid gap-2 grid-cols-3 lg:grid-cols-6 md:grid-cols-4 ">
               {addedPhotos.length > 0 &&
                 addedPhotos.map((link) => (
-                  <div>
+                  <div className="h-32 flex w-full object-cover">
                     <img
                       className="rounded-2xl"
                       src={"http://localhost:4000/uploads/" + link}
@@ -121,8 +142,13 @@ const PlacesPage = () => {
                   </div>
                 ))}
 
-              <label className="cursor-pointer flex items-center justify-center gap-1 border bg-transparent rounded-2xl p-2 text-2xl text-gray-600">
-                <input type="file" className="hidden" />
+              <label className="h-32 cursor-pointer flex items-center justify-center gap-1 border bg-transparent rounded-2xl p-2 text-2xl text-gray-600">
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={uploadPhoto}
+                />
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
