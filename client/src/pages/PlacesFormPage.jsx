@@ -3,9 +3,11 @@ import Perks from "../Perks";
 import axios from "axios";
 import PhotosUploader from "../PhotosUploader";
 import AccountNav from "../AccountNav";
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 
 const PlacesFormPage = () => {
+  const { id } = useParams();
+
   const [title, setTitle] = useState("");
   const [address, setAddress] = useState("");
   const [addedPhotos, setAddedPhotos] = useState([]);

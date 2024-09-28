@@ -5,6 +5,7 @@ const mongoose = require("mongoose"); // Mongoose is a library to interact with 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken"); // JWT (JSON Web Token) is used for authentication (generating and verifying tokens).
 const UserModel = require("./models/User");
+const PlaceModel = require("./models/Place");
 const cookieParser = require("cookie-parser"); // Parses cookies attached to the client request object.
 const imageDownloader = require("image-downloader");
 const multer = require("multer");
@@ -145,6 +146,37 @@ app.post("/upload", photosMiddleware.array("photos", 100), (req, res) => {
   res.json(uploadedFiles);
 });
 
-app.post("/places", (req, res) => {});
+app.post("/places", (req, res) => {
+  const { token } = req.cookies;
+
+  const {
+    title,
+    address,
+    addedPhotos,
+    description,
+    perks,
+    extraInfo,
+    checkIn,
+    checkOut,
+    maxGuests,
+  } = req.body;
+
+  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+    if (err) throw err;
+    const placeDoc = await PlaceModel.create({
+      owner: userData.id,
+      title,
+      address,
+      addedPhotos,
+      description,
+      perks,
+      extraInfo,
+      checkIn,
+      checkOut,
+      maxGuests,
+    });
+    res.json(placeDoc);
+  });
+});
 
 app.listen(4000);
