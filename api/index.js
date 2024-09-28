@@ -7,6 +7,9 @@ const jwt = require("jsonwebtoken"); // JWT (JSON Web Token) is used for authent
 const UserModel = require("./models/User");
 const cookieParser = require("cookie-parser"); // Parses cookies attached to the client request object.
 const imageDownloader = require("image-downloader");
+const multer = require("multer");
+const fs = require("fs");
+
 require("dotenv").config();
 
 // Creating an instance of an Express application
@@ -113,7 +116,7 @@ app.get("/profile", (req, res) => {
 app.post("/logout", (req, res) => {
   res.cookie("token", "").json(true);
 });
-console.log(__dirname);
+
 app.post("/upload-by-link", async (req, res) => {
   const { link } = req.body;
 
@@ -126,5 +129,22 @@ app.post("/upload-by-link", async (req, res) => {
   res.json(newName);
 });
 
-// Start the Express server and listen on port 4000
-app.listen(4000); // Starts the server on port 4000 and begins listening for incoming HTTP requests.
+const photosMiddleware = multer({ dest: "uploads/" });
+app.post("/upload", photosMiddleware.array("photos", 100), (req, res) => {
+  const uploadedFiles = [];
+  for (let i = 0; i < req.files.length; i++) {
+    const { path, originalname } = req.files[i];
+    const parts = originalname.split(".");
+    const ext = parts[parts.length - 1];
+    const newPath = path + "." + ext;
+    fs.renameSync(path, newPath);
+    console.log(newPath);
+    uploadedFiles.push(newPath.replace("uploads\\", ""));
+  }
+
+  res.json(uploadedFiles);
+});
+
+app.post("/places", (req, res) => {});
+
+app.listen(4000);
