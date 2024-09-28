@@ -47,9 +47,10 @@ const PlacesPage = () => {
               to={"/account/places/" + place._id}
               className="flex cursor-pointer gap-4 bg-gray-100 p-2 rounded-2xl"
             >
-              <div className="w-32 h-full bg-gray-300 grow shrink-0">
+              <div className="flex w-32 h-32 bg-gray-300 grow shrink-0">
                 {place.photos.length > 0 && (
                   <img
+                    className="object-cover"
                     src={"http://localhost:4000/uploads/" + place.photos[0]}
                   />
                 )}
