@@ -44,7 +44,7 @@ const PlacesPage = () => {
         {places.length > 0 &&
           places.map((place) => (
             <Link
-              to={"/account/places/" + place.id}
+              to={"/account/places/" + place._id}
               className="flex cursor-pointer gap-4 bg-gray-100 p-2 rounded-2xl"
             >
               <div className="w-32 h-full bg-gray-300 grow shrink-0">
