@@ -115,31 +115,39 @@ app.get("/profile", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
+  // Set the "token" cookie to an empty string, effectively logging out the user
   res.cookie("token", "").json(true);
 });
 
 app.post("/upload-by-link", async (req, res) => {
+  // Extracts the `link` property from the request body
   const { link } = req.body;
 
+  // Create a unique name for the downloaded image using the current timestamp
   const newName = "photo" + Date.now() + ".jpg";
 
+  // Download the image from the provided link and save it to the `uploads` folder
   await imageDownloader.image({
-    url: link,
-    dest: __dirname + "/uploads/" + newName, //C:\Users\khalid\projects\booking-app-mern\api
+    url: link, // The URL of the image to download.
+    dest: __dirname + "/uploads/" + newName, // Destination where the image will be saved. //C:\Users\khalid\projects\booking-app-mern\api
   });
   res.json(newName);
 });
 
+// Set up middleware for handling file uploads using `multer`
+// Configure multer to save uploaded files in the `uploads` folder.
 const photosMiddleware = multer({ dest: "uploads/" });
+
 app.post("/upload", photosMiddleware.array("photos", 100), (req, res) => {
+  // `photosMiddleware.array` allows up to 100 photos to be uploaded in a single request
   const uploadedFiles = [];
   for (let i = 0; i < req.files.length; i++) {
     const { path, originalname } = req.files[i];
     const parts = originalname.split(".");
     const ext = parts[parts.length - 1];
     const newPath = path + "." + ext;
+    // Rename the uploaded file to include the extension (e.g., `uploads/filename.jpg`)
     fs.renameSync(path, newPath);
-    console.log(newPath);
     uploadedFiles.push(newPath.replace("uploads\\", ""));
   }
 
@@ -159,8 +167,10 @@ app.post("/places", (req, res) => {
     checkIn,
     checkOut,
     maxGuests,
+    price,
   } = req.body;
 
+  // Verifies the JWT token to get the user's information
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     if (err) throw err;
     const placeDoc = await PlaceModel.create({
@@ -174,16 +184,21 @@ app.post("/places", (req, res) => {
       checkIn,
       checkOut,
       maxGuests,
+      price,
     });
     res.json(placeDoc);
   });
 });
 
-app.get("/places", (req, res) => {
+app.get("/user-places", (req, res) => {
+  // Extracts the JWT token from the cookies
   const { token } = req.cookies;
 
+  // Verifies the JWT token to get the user's information
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     const { id } = userData;
+
+    // Find and respond with all places where the owner matches the logged-in user
     res.json(await PlaceModel.find({ owner: id }));
   });
 });
@@ -208,11 +223,14 @@ app.put("/places", async (req, res) => {
     checkIn,
     checkOut,
     maxGuests,
+    price,
   } = req.body;
 
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     if (err) throw err;
     const placeDoc = await PlaceModel.findById(id);
+
+    // Check if the logged-in user is the owner of the place
     if (userData.id === placeDoc.owner.toString()) {
       placeDoc.set({
         title,
@@ -224,11 +242,16 @@ app.put("/places", async (req, res) => {
         checkIn,
         checkOut,
         maxGuests,
+        price,
       });
       await placeDoc.save();
       res.json(placeDoc);
     }
   });
+});
+
+app.get("/places", async (req, res) => {
+  res.json(await PlaceModel.find());
 });
 
 app.listen(4000);
